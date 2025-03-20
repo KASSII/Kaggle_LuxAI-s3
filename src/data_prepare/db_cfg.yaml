@@ -1,0 +1,42 @@
+input_root_dir: "datas/scraping"
+target_sub_ids: ["42704976", "42705163", "43152191", "43155694", "43212163", "43212846", "43276830"]
+output_dir: "datas/db/luxs3_db"
+
+use_only_win: true
+use_only_done_status: true
+exclude_ignore: true
+point_prob_configs:
+  add_const: 0.1
+  sub_const: -1.0
+
+target_states: [
+  unit.self_unit_pos,
+  unit.opp_unit_pos,
+  unit.self_energy,
+  unit.opp_energy,
+  unit.self_enable_move,
+  unit.opp_enable_move,
+  unit.self_enable_sap,
+  unit.opp_enable_sap,
+
+  map.tyle_type,
+  map.visible_mask,
+  map.energy,
+  map.relic_nodes,
+
+  point.prob_map,
+
+  meta.self_reward,
+  meta.opp_reward,
+  meta.match_steps,
+  meta.match_round,
+  meta.self_team_point,
+  meta.opp_team_point,
+  meta.self_team_win,
+  meta.opp_team_win,
+  meta.unit_move_cost,
+  meta.unit_sap_cost,
+  meta.unit_sap_range,
+  meta.nebula_tile_drift_speed,
+  meta.unit_sap_dropoff_factor,
+]

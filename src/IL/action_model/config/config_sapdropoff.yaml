@@ -1,0 +1,119 @@
+comment: |-
+  Imitation Learning with UNet for stacked input preframe frames.
+  Using the board information and global features of continupus turns as input, the action map of the next turn is estimated by Unet.
+  The target coordinates of the sap are not estimated.
+
+exp_name: action_model
+run_name: basemodel_with_sapdropoff
+task_type: action
+output_dir: "datas/output/IL"
+add_unique_str: false
+seed: 42
+wandb_log: false
+do_early_stopping: false
+
+train_folds: [0]
+
+dataset:
+  dataset_path: datas/db/luxs3_db
+  use_submit_ids: [42704976, 42705163, 43152191, 43155694, 43212163, 43212846]
+  n_splits: 75
+
+  augmentation:
+    rotate: true
+    flip: true
+
+  using_states: [
+    unit.self_unit_pos,
+    unit.opp_unit_pos,
+    unit.self_energy,
+    unit.opp_energy,
+    unit.self_enable_move,
+    unit.opp_enable_move,
+    unit.self_enable_sap,
+    unit.opp_enable_sap,
+
+    map.tyle_type,
+    map.visible_mask,
+    map.energy,
+    map.relic_nodes,
+
+    point.prob_map,
+  ]
+  using_pre_states: [
+    unit.self_unit_pos,
+    unit.opp_unit_pos,
+  ]
+  using_meta_states: [
+    meta.self_reward,
+    meta.opp_reward,
+    meta.match_steps,
+    meta.match_round,
+    meta.self_team_point,
+    meta.opp_team_point,
+    meta.self_team_win,
+    meta.opp_team_win,
+    meta.unit_move_cost,
+    meta.unit_sap_cost,
+    meta.unit_sap_range,
+    meta.unit_sap_dropoff_factor,
+  ]
+  mask_state_name: unit.self_unit_pos
+    
+  preprocess_cfg:
+    unit.self_energy:
+      normalize: [0, 20]
+    unit.opp_energy:
+      normalize: [0, 20]
+    map.energy:
+      mask: ["map.tyle_type", -1, -20]    # [mask_name, mask_cond, replace_num]
+      normalize: [0, 20]
+    point.prob_map:
+      clip: [-1, 1]
+      normalize: [-1, 1]
+    
+    meta.self_reward:
+      normalize: [0, 10]
+    meta.opp_reward:
+      normalize: [0, 10]
+    meta.match_steps:
+      normalize: [0, 100]
+    meta.match_round:
+      normalize: [0, 4]
+    meta.self_team_point:
+      normalize: [0, 100]
+    meta.opp_team_point:
+      normalize: [0, 100]
+    meta.self_team_win:
+      normalize: [0, 5]
+    meta.opp_team_win:
+      normalize: [0, 5]
+    
+    meta.unit_move_cost:
+      normalize: [0, 20]
+    meta.unit_sap_cost:
+      normalize: [0, 20]
+
+dataloader:
+  train:
+    batch_size: 512
+    shuffle: true
+    pin_memory: true
+    drop_last: true
+    num_workers: 8
+  valid:
+    batch_size: 1024
+    shuffle: false
+    pin_memory: true
+    drop_last: false
+    num_workers: 8
+
+optimizer:
+  lr: 0.001
+
+scheduler:
+  warmup: 0.1
+
+trainer:
+  max_epochs: 30
+  precision: 16
